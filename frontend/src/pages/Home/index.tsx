@@ -7,6 +7,7 @@ import SortableBoard from './SortableBoard';
 function Home() {
   return (
     <div>
+      {/* ヘッダー */}
       <header className="header">
         <div className="header-left">
           <button className="apps-button">
@@ -23,6 +24,7 @@ function Home() {
         </div>
       </header>
 
+      {/* ボードヘッダー */}
       <div className="board-header">
         <h1 className="board-title">マイボード</h1>
       </div>

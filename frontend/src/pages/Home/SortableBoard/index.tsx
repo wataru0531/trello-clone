@@ -11,6 +11,7 @@ function SortableBoard(){
         <SortableList />
       </div>
 
+      {/* リストを追加するボタン */}
       <AddList />
       
     </div>

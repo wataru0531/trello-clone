@@ -19,6 +19,7 @@ export function SortableList(){
             </svg>
           </button>
         </div>
+        
         <div style={{ minHeight: "1px" }}>
           <SortableCard />
         </div>
