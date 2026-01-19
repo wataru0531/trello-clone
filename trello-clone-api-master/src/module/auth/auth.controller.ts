@@ -1,5 +1,8 @@
+
+// authController
+
 import { Router, Request, Response } from 'express';
-import datasource from '../../datasource';
+import datasource from '../../datasource'; // DB接続＋ORM全体の管理者
 import { User } from '../users/user.entity';
 import { compare, hash } from 'bcryptjs';
 import { encodeJwt } from '../../lib/jwt';
@@ -7,11 +10,16 @@ import { Board } from '../boards/board.entity';
 import { BoardUser } from '../board-users/board-user.entity';
 
 const authController = Router();
+
+// Userエンティティ(＝usersテーブル)を操作するための「専用の窓口(Repository)」を取得
+// Repository → そのテーブルを操作するための道具
+// Entity(User) → テーブルの設計図
 const userRepository = datasource.getRepository(User);
+
 const boardRepository = datasource.getRepository(Board);
 const boardUserRepository = datasource.getRepository(BoardUser);
 
-// ユーザー登録
+// ✅ ユーザー登録
 authController.post('/signup', async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
@@ -23,9 +31,7 @@ authController.post('/signup', async (req: Request, res: Response) => {
     // メールアドレスの重複チェック
     const existingUser = await userRepository.findOne({ where: { email } });
     if (existingUser) {
-      res
-        .status(400)
-        .json({ message: 'このメールアドレスは既に使用されています' });
+      res.status(400).json({ message: 'このメールアドレスは既に使用されています' });
       return;
     }
 
@@ -80,7 +86,7 @@ authController.post('/signup', async (req: Request, res: Response) => {
   }
 });
 
-// ログイン
+// ✅ ログイン
 authController.post('/signin', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -132,7 +138,7 @@ authController.post('/signin', async (req: Request, res: Response) => {
   }
 });
 
-// 現在のユーザー情報取得
+// ✅ 現在のユーザー情報取得
 authController.get('/me', async (req: Request, res: Response) => {
   try {
     if (req.currentUser == null) {

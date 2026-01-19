@@ -28,6 +28,8 @@ app.use(setCurrentUser); // JWTなどを解析 ... 認証の下準備
 app.use('/uploads', express.static('uploads'));
 
 // ルートの設定 ... ルーティング
+// ✅ Controller(コントローラ) 
+// → 「HTTPリクエストを受け取り、処理を振り分け、レスポンスを返す“交通整理役”」
 app.use('/auth', authController);
 app.use('/account', accountController);
 app.use('/cards', cardController);
