@@ -13,8 +13,9 @@
 
 export class User {
   // クラスで使うプロパティ宣言 + このクラスが持つ型情報を定義
-  // → ⭐️ TypeScriptファイルでのみ可能
-  id!: string;
+  // → これらのプロパティ宣言がなくても型としてこのクラスは使えるが意味のない型になる
+  // → ⭐️ TypeScriptファイルでのみ可能。
+  id!: string; // ! = 「後で必ず代入されるから、未初期化でも怒らないでということ
   name!: string;
   email!: string;
   boardId!: string;
