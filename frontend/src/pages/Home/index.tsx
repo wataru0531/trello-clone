@@ -1,10 +1,19 @@
 
 // Home > index.tsx
 
+import { useAtomValue } from "jotai";
+import { Navigate } from "react-router-dom";
+
 import './Home.css';
 import SortableBoard from './SortableBoard';
+import { currentUserAtom } from "../../modules/auth/current-user";
 
 function Home() {
+  const currentUser = useAtomValue(currentUserAtom);
+  // console.log(currentUser); // User {id: '9f122c2a-6d50-4ec5-9801-9a988cd39d4a', name: 'wataru', email: 'obito0531@gmail.com', boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', thumbnailUrl: null, …}
+
+  if(currentUser == null) return <Navigate to="/signin" replace={ true } />
+  
   return (
     <div>
       {/* ヘッダー */}

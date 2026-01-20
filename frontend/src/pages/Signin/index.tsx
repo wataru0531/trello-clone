@@ -7,6 +7,7 @@ import  { useAtom } from "jotai";
 
 import '../Signup/auth.css';
 import { authRepository } from "../../modules/auth/auth.repository";
+import { currentUserAtom } from "../../modules/auth/current-user";
 
 
 function Signin() {
@@ -14,11 +15,8 @@ function Signin() {
   const [ password, setPassword ] = useState("");
   const [ errorMessage, setErrorMessage ] = useState<string | null>(null);
   const [ isSubmitting, setIsSubmitting ] = useState(false);
-  const [ currentUser, setCurrentUser ] = useAtom(null);
 
-  // true ... 遷移時に履歴(history)を置き換える
-  if(currentUser != null) return <Navigate to="/" replace={ true } /> 
-
+  const [ currentUser, setCurrentUser ] = useAtom(currentUserAtom); // ⭐️
 
   // email
   const onChangeSetEmail = (e:React.ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +28,7 @@ function Signin() {
     setPassword(e.target.value);
   }
 
-  // フォーム送信
+  // 送信処理
   const onSubmitSignin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -43,7 +41,8 @@ function Signin() {
       const { user, token } = await authRepository.signin(email, password);
       // console.log(user, token); // User {id: '9f122c2a-6d50-4ec5-9801-9a988cd39d4a', name: 'wataru', email: 'obito0531@gmail.com', boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', thumbnailUrl: null, …} 
                                 // 'eyJhbGciOiJIUzI1NiJ9.OWYxMjJjMmEtNmQ1MC00ZWM1LTk4MDEtOWE5ODhjZDM5ZDRh.kSz52pHmSN51vjMlcapDY-CC88lEL0XRrO70jfgkaog'
-
+      setCurrentUser(user);
+          
     }catch(e){
       console.error(e);
       setErrorMessage("メールアドレスまたはパスワードが正しくありません。");
@@ -54,6 +53,8 @@ function Signin() {
       setIsSubmitting(false);
     }
   }
+
+  if(currentUser != null) return <Navigate to="/" replace={ true } /> // true ... 遷移時に履歴(history)を置き換える
 
   return (
     <div className="signup-container">
