@@ -1,3 +1,8 @@
+
+// ✅ account.controller
+
+
+
 import { Router, Request, Response } from 'express';
 import datasource from '../../datasource';
 import { User } from '../users/user.entity';
@@ -18,14 +23,14 @@ accountController.put('/profile', Auth, async (req: Request, res: Response) => {
       },
     });
 
-    if (user == null) {
+    if(user == null) {
       res.status(404).json({ message: 'ユーザーが見つかりません' });
       return;
     }
 
     const updatedUser = await userRepository.save({
       ...user,
-      name: req.body.name,
+      name: req.body.name, // 
     });
 
     res.status(200).json({
