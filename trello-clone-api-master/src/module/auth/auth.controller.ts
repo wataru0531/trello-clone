@@ -155,6 +155,7 @@ authController.get('/me', async (req: Request, res: Response) => {
       res.status(404).json({ message: 'ユーザーが見つかりません' });
       return;
     }
+    
     res.status(200).json({
       ...user,
       boardId: user.boardUsers![0].boardId,

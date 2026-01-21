@@ -41,8 +41,11 @@ function Signin() {
       const { user, token } = await authRepository.signin(email, password);
       // console.log(user, token); // User {id: '9f122c2a-6d50-4ec5-9801-9a988cd39d4a', name: 'wataru', email: 'obito0531@gmail.com', boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', thumbnailUrl: null, …} 
                                 // 'eyJhbGciOiJIUzI1NiJ9.OWYxMjJjMmEtNmQ1MC00ZWM1LTk4MDEtOWE5ODhjZDM5ZDRh.kSz52pHmSN51vjMlcapDY-CC88lEL0XRrO70jfgkaog'
+      
+      localStorage.setItem("token", token); // 👉 ローカルストレージにトークンを保存
+
       setCurrentUser(user);
-          
+      
     }catch(e){
       console.error(e);
       setErrorMessage("メールアドレスまたはパスワードが正しくありません。");

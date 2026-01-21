@@ -1,14 +1,35 @@
-export const Sidebar = () => {
+
+// ✅ Sidebar
+
+import { useState } from "react";
+import { useAtom } from "jotai";
+import { currentUserAtom } from "../../../modules/auth/current-user";
+
+type SidebarProps = {
+  onClickCloseSidebar: () => void
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onClickCloseSidebar }) => {
+  const [ currentUser, setCurrentUser ] = useAtom(currentUserAtom);
+  console.log(currentUser);
+  const [ name, setName ] = useState(currentUser?.name ? currentUser?.name : "ユーザー")
+
   return (
     <>
-      <div className="sidebar-overlay" />
+      <div 
+        className="sidebar-overlay" 
+        onClick={ onClickCloseSidebar }
+      />
       <div className="sidebar">
         <div className="sidebar-header">
-          <button className="sidebar-close-button">×</button>
+          <button 
+            className="sidebar-close-button"
+            onClick={ onClickCloseSidebar }
+          >×</button>
 
           <div className="sidebar-user-info">
             <div className="sidebar-user-name" title="プロフィールを編集">
-              テストユーザー
+              { name }
             </div>
             <button className="sidebar-edit-button" title="プロフィールを編集">
               ✏️

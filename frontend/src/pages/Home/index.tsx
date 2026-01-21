@@ -1,16 +1,28 @@
 
 // Home > index.tsx
 
+import { useState } from "react";
 import { useAtomValue } from "jotai";
 import { Navigate } from "react-router-dom";
 
 import './Home.css';
 import SortableBoard from './SortableBoard';
 import { currentUserAtom } from "../../modules/auth/current-user";
+import { Sidebar } from "./Sidebar";
 
 function Home() {
   const currentUser = useAtomValue(currentUserAtom);
   // console.log(currentUser); // User {id: '9f122c2a-6d50-4ec5-9801-9a988cd39d4a', name: 'wataru', email: 'obito0531@gmail.com', boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', thumbnailUrl: null, …}
+  const [ showSidebar, setShowSidebar ] = useState(false);
+
+  const onClickShowSidebar = () => {
+    // setShowSidebar(prevState => !prevState);
+    setShowSidebar(true);
+  }
+
+  const onClickCloseSidebar = () => {
+    setShowSidebar(false);
+  }
 
   if(currentUser == null) return <Navigate to="/signin" replace={ true } />
   
@@ -19,7 +31,10 @@ function Home() {
       {/* ヘッダー */}
       <header className="header">
         <div className="header-left">
-          <button className="apps-button">
+          <button 
+            className="apps-button"
+            onClick={ onClickShowSidebar }
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z" />
             </svg>
@@ -39,7 +54,10 @@ function Home() {
       </div>
 
       <SortableBoard />
-      {/* <Sidebar /> */}
+
+      {/* サイドバー(メニュー) */}
+      { showSidebar && <Sidebar onClickCloseSidebar={ onClickCloseSidebar } /> }
+
       {/* <CardModal /> */}
     </div>
   );
