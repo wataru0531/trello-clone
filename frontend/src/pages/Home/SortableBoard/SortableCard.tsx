@@ -1,4 +1,9 @@
+
+// ✅ SortableCard
+// → SortableListの中にあるカード1つを示す
+
 export function SortableCard() {
+
   return (
     <div>
       <div className={`card`}>

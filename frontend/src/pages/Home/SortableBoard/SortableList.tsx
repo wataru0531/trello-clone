@@ -1,4 +1,6 @@
 
+// ✅ SortableList
+// → リスト1つ
 
 import { SortableCard } from './SortableCard';
 import { AddCard } from './AddCard';
@@ -24,6 +26,7 @@ export function SortableList(){
           <SortableCard />
         </div>
 
+        {/* カードを追加 */}
         <AddCard />
       </div>
     </div>

@@ -1,3 +1,6 @@
+
+// ✅　カードを追加するコンポーネント
+
 export function AddCard() {
   return <button className="add-card-button">＋ カードを追加</button>;
 

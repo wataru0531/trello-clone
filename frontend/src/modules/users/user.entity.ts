@@ -18,7 +18,8 @@ export class User {
   id!: string; // ! = 「後で必ず代入されるから、未初期化でも怒らないでということ
   name!: string;
   email!: string;
-  boardId!: string;
+  boardId!: string; // → ⭐️ ユーザー１つに対してボードの部屋ができる
+                    //      このboardIdの中に、List、カードなどを作っていく
 
   constructor(data: User) {
     // ✅ 自己参照型 ... Userの中でdataをUser型にする
