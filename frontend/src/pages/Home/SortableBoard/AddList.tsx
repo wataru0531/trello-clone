@@ -17,13 +17,13 @@ export function AddList({ createList }: AddListProps) {
     setTitle("");
   }
 
-  // 
+  // リストを生成
   const onSubmitCreateList = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if(title === "") return;
 
     try {
-      await createList(title);
+      await createList(title); // 👉 リストを生成
 
     } catch(e) {
       console.log("リストの制作に失敗しました。", e);
@@ -32,9 +32,9 @@ export function AddList({ createList }: AddListProps) {
       setTitle("");
       setShowInput(false);
     }
-
   }
 
+  // ✅「 もう1つリストを追加 」
   if(!showInput) {
     return (
       <button 
@@ -44,6 +44,7 @@ export function AddList({ createList }: AddListProps) {
     )
   }
 
+  // ✅ クリック後に表示
   return (
     <form 
       className="add-list-form"

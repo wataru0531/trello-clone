@@ -1,3 +1,6 @@
+
+// ✅ list.controller.ts
+
 import { Router, Request, Response } from 'express';
 import datasource from '../../datasource';
 import { List } from './list.entity';
@@ -7,14 +10,17 @@ import { In } from 'typeorm';
 const listController = Router();
 const listRepository = datasource.getRepository(List);
 
-// ボード内のリストを取得
+
+// ✅ ボード内のリストを取得
+// Authが実行 → 問題なければ、Auth内のnext()は走り次のコールバックが実行される。
+//           → currentUserが存在するかどうかをチェック
 listController.get('/:boardId', Auth, async (req: Request, res: Response) => {
   try {
     const { boardId } = req.params;
     const lists = await listRepository.find({
       where: { boardId },
       relations: ['cards'],
-      order: { position: 'ASC' },
+      order: { position: 'ASC' }, // 昇順　1 2 3
     });
 
     res.status(200).json(lists);
@@ -24,7 +30,7 @@ listController.get('/:boardId', Auth, async (req: Request, res: Response) => {
   }
 });
 
-// 特定のリストを取得
+// ✅ 特定のリストを取得
 listController.get('/:id', Auth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -45,7 +51,7 @@ listController.get('/:id', Auth, async (req: Request, res: Response) => {
   }
 });
 
-// リストを作成
+// ✅ リストを作成
 listController.post('/', Auth, async (req: Request, res: Response) => {
   try {
     const { title, boardId } = req.body;

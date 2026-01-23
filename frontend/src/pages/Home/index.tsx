@@ -1,28 +1,37 @@
 
 // Home > index.tsx
 
-import { useState } from "react";
-import { useAtomValue } from "jotai";
+import { useState, useEffect } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
 import { Navigate } from "react-router-dom";
 
 import './Home.css';
 import SortableBoard from './SortableBoard';
 import { currentUserAtom } from "../../modules/auth/current-user";
 import { Sidebar } from "./Sidebar";
+import { listsAtom } from "../../modules/lists/list.state"; // Listsのアトム
+import { listRepository } from "../../modules/lists/list.repository";
 
 function Home() {
+  const [ showSidebar, setShowSidebar ] = useState(false);
   const currentUser = useAtomValue(currentUserAtom);
   // console.log(currentUser); // User {id: '9f122c2a-6d50-4ec5-9801-9a988cd39d4a', name: 'wataru', email: 'obito0531@gmail.com', boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', thumbnailUrl: null, …}
-  const [ showSidebar, setShowSidebar ] = useState(false);
+  const setLists = useSetAtom(listsAtom); // 👉 更新するだけのメソッド
 
-  const onClickShowSidebar = () => {
-    // setShowSidebar(prevState => !prevState);
-    setShowSidebar(true);
+  const onClickShowSidebar = () => setShowSidebar(true);
+  const onClickCloseSidebar = () => setShowSidebar(false);
+
+  // ✅ リストを取得してグローバルステートに保持
+  const fetchLists = async () => {
+    const lists = await listRepository.find(currentUser!.boardId); // ! ... 非null断言演算子
+                                                                   //       これは絶対にnull / undefinedではない
+    setLists(lists); // 👉 グローバルステートに保持。更新用関数                             
   }
 
-  const onClickCloseSidebar = () => {
-    setShowSidebar(false);
-  }
+  useEffect(() => {
+    fetchLists();
+  }, [ currentUser ]); // ログインしているユーザーが変わればboardIdも変わるのでlistsのデータを取得しなおす
+
 
   if(currentUser == null) return <Navigate to="/signin" replace={ true } />
   

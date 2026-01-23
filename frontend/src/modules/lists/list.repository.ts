@@ -7,6 +7,7 @@ import { List } from "./list.entity";
 
 
 export const listRepository = {
+  // ✅ リストを生成する処理
   async create(
     boardId: string, // Userに定義したこのIdにリスト、カードを作っていく
     title: string,
@@ -17,6 +18,13 @@ export const listRepository = {
     });
 
     return new List(result.data);
+  },
+
+  // ✅ リストを取得する処理
+  async find(boardId: string): Promise<List[]> {
+    const result = await api.get(`/lists/${boardId}`);
+
+    return result.data.map((list: List) => new List(list));
   },
 
 

@@ -11,6 +11,3 @@ export class List {
     Object.assign(this, data);
   }
 }
-
-
-

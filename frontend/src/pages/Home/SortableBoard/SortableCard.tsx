@@ -4,6 +4,8 @@
 
 export function SortableCard() {
 
+  const datetime = "2025-06-08";
+
   return (
     <div>
       <div className={`card`}>
@@ -15,7 +17,8 @@ export function SortableCard() {
           </span>
           テストカード
         </div>
-        <div className="card-badge">🕒 2025-06-08</div>
+        {/* <div className="card-badge">🕒 2025-06-08</div> */}
+        <time dateTime={ datetime } className="card-badge">🕒 { datetime }</time>
       </div>
     </div>
   );
