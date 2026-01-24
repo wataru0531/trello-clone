@@ -1,6 +1,6 @@
 
 // list.repository.ts
-// → リストに関する処理
+// → リストに関するAPI
 
 import api from "../../lib/api";
 import { List } from "./list.entity";
@@ -27,7 +27,11 @@ export const listRepository = {
     return result.data.map((list: List) => new List(list));
   },
 
-
+  // ✅ リストを削除する
+  async delete(id: string): Promise<boolean> {
+    await api.delete(`/lists/${id}`);
+    return true;
+  },
 
 
 }

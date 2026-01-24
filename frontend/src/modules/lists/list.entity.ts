@@ -1,6 +1,7 @@
 
 // ✅ list.entity.ts
 // → リストに関するエンティティ
+// クラスであり、型
 
 export class List {
   id!: string;

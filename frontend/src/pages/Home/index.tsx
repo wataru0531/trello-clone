@@ -16,7 +16,7 @@ function Home() {
   const [ showSidebar, setShowSidebar ] = useState(false);
   const currentUser = useAtomValue(currentUserAtom);
   // console.log(currentUser); // User {id: '9f122c2a-6d50-4ec5-9801-9a988cd39d4a', name: 'wataru', email: 'obito0531@gmail.com', boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', thumbnailUrl: null, …}
-  const setLists = useSetAtom(listsAtom); // 👉 更新するだけのメソッド
+  const setLists = useSetAtom(listsAtom); // 👉 リストを更新するだけのメソッド
 
   const onClickShowSidebar = () => setShowSidebar(true);
   const onClickCloseSidebar = () => setShowSidebar(false);
@@ -31,7 +31,6 @@ function Home() {
   useEffect(() => {
     fetchLists();
   }, [ currentUser ]); // ログインしているユーザーが変わればboardIdも変わるのでlistsのデータを取得しなおす
-
 
   if(currentUser == null) return <Navigate to="/signin" replace={ true } />
   
@@ -62,6 +61,7 @@ function Home() {
         <h1 className="board-title">マイボード</h1>
       </div>
 
+      {/* リスト */}
       <SortableBoard />
 
       {/* サイドバー(メニュー) */}
