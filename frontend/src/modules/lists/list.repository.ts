@@ -27,6 +27,14 @@ export const listRepository = {
     return result.data.map((list: List) => new List(list));
   },
 
+  // ✅ データベースのリストを更新する。インデックス(順番)などを更新
+  async update(lists: List[]): Promise<List[]> {
+    const result = await api.put("/lists", { lists });
+    // → 受け取ったリストのidに一致するdb側のリストを更新する
+
+    return result.data.map((list: List) => new List(list));
+  },
+
   // ✅ リストを削除する
   async delete(id: string): Promise<boolean> {
     await api.delete(`/lists/${id}`);

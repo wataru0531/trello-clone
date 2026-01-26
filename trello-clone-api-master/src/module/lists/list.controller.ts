@@ -94,18 +94,22 @@ listController.post('/', Auth, async (req: Request, res: Response) => {
 // リストを更新（単一または複数）
 listController.put('/', Auth, async (req: Request, res: Response) => {
   try {
-    const { lists } = req.body;
+    const { lists } = req.body; // 更新したいリスト
+    // console.log(lists); // 👉 更新後の配列
 
-    // リクエストが配列でない場合は配列に変換
-    const listsToUpdate = Array.isArray(lists) ? lists : [lists];
+    const listsToUpdate = Array.isArray(lists) ? lists : [lists]; // リクエストが配列でない場合は配列に変換
 
     if (listsToUpdate == null || listsToUpdate.length === 0) {
       res.status(400).json({ message: '更新するリストが指定されていません' });
       return;
     }
 
-    // 更新対象のリストIDを取得
+    // ✅ 更新対象のリストIDを取得
+    // ✅ 更新対象として“安全に”扱えるリストIDだけを抽出する ... null、undefinedなどがある可能性があるため。DBを壊さない
+    // console.log(listsToUpdate.map(list => list.id)); // [ 'cd3178fb-1e2f-4f42-b428-7c2dbed63d6b', 'b53c7c1d-b7db-4cd1-ba68-ed030a8b8f5c', '21c84dc2-75e3-4ef4-9be8-e2ab753d4c24', '5cabb825-f10e-4e83-8cdc-cb807295f9b9']
+    // console.log(listsToUpdate.map((list) => list.id).filter((id) => id))
     const listIds = listsToUpdate.map((list) => list.id).filter((id) => id);
+    // console.log(listIds); // [ 'cd3178fb-1e2f-4f42-b428-7c2dbed63d6b', 'b53c7c1d-b7db-4cd1-ba68-ed030a8b8f5c', '21c84dc2-75e3-4ef4-9be8-e2ab753d4c24', '5cabb825-f10e-4e83-8cdc-cb807295f9b9']
 
     if (listIds.length === 0) {
       res.status(400).json({ message: 'リストIDが指定されていません' });
@@ -113,22 +117,33 @@ listController.put('/', Auth, async (req: Request, res: Response) => {
     }
 
     // 既存のListエンティティを取得
+    // 👉 指定されたIDのリストを、DBからまとめて取得
     const existingLists = await listRepository.findBy({
       id: In(listIds),
     });
 
-    // 既存データに更新データをマージ
+    // ⭐️ 既存データに更新データをマージ
+    // existingLists → DBから取得した既存データ
+    // listsToUpdate → フロントから送られてきた更新データ
     const mergedLists = existingLists.map((existingList) => {
       const updateData = listsToUpdate.find(
         (list) => list.id === existingList.id
       );
+      // console.log(updateData); // 更新後のリストの配列
+      // 例えば...
+      // フロント　[2, 1, 4, 3] 
+      // DB [1, 2 , 3, 4] 
+      // だとしたら、 これらを全て結びつけてすべてのリストを更新
+
       return {
         ...existingList,
         ...updateData,
       };
     });
 
-    // 一括更新
+    // ✅ 一括更新
+    // IDが既に存在する行は、title と position だけを更新する」
+    // IDが存在しない行は INSERT される
     await datasource
       .createQueryBuilder()
       .insert()
@@ -137,7 +152,7 @@ listController.put('/', Auth, async (req: Request, res: Response) => {
       .orUpdate(['title', 'position'])
       .execute();
 
-    const updatedLists = await listRepository.findBy({
+    const updatedLists = await listRepository.findBy({ // 👉 DBの最新の状態を取得
       id: In(listIds),
     });
 

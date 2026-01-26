@@ -52,7 +52,7 @@ function SortableBoard(){
 
   // ✅ ドラッグで並び替えられた順番を、配列として作り直して、stateに保存
   // 👉 移動後に発火
-  const handleDragEnd = (result: DropResult) => {
+  const handleDragEnd = async (result: DropResult) => {
     const { source, destination } = result; // source:移動元の情報、destination:移動先の情報
                                             
     if(destination === null) return; // ドラッグしたが、ドラッグ可能エリア外で離したなど
@@ -61,20 +61,35 @@ function SortableBoard(){
     const [ reorderedList ] = sortedLists.splice(source.index, 1);
     // console.log(reorderedList); // List {id: 'cd3178fb-1e2f-4f42-b428-7c2dbed63d6b', title: 'テストカード3', position: 3, boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', createdAt: '2026-01-23T13:38:19.000Z', …}
 
-    // ✅ 移動先に差し込む
-    // destination.index → 移動先のindexの位置
+    // ✅ 移動先に差し込む 👉 移動先の index の位置に、ドラッグしたリストを挿入
+    // destination.index → 挿入したい位置
     // 0 → 何も削除せず
-    // reorderedList → 動かしたリストを挿入
+    // reorderedList → 挿入する要素
     sortedLists.splice(destination.index, 0, reorderedList);
 
-    const updatedLists = sortedLists.map((list, idx) => { // 👉 positionを全部降り直す
+    // const array = ["A", "C", "B"]; // 👉 spliceの基本
+    // array.splice(1, 0, "B");
+    // console.log(array); // (4) ['A', 'B', 'C', 'B']
+
+    // ✅ 最終的な順番に合わせて position を振り直す
+    const updatedLists = sortedLists.map((list, idx) => { 
       return {
         ...list,
-        position: idx, // ここで更新
+        position: idx, // ここで更新、上書き
       }
     });
 
-    setLists(updatedLists); // グローバルステートを更新
+    const originalLists = [ ...lists ]; // 更新に失敗した時に使う
+    setLists(updatedLists); // 👉 グローバルステートを更新(上書き)
+
+    // ✅ DBの中も更新していく
+    try {
+      await listRepository.update(updatedLists);
+
+    } catch(e) {
+      console.error("リストの更新に失敗しました。", e);
+      setLists(originalLists); // 👉 失敗した場合は元のリストの配列をいれてやる
+    }
   }
 
   return(
@@ -93,13 +108,13 @@ function SortableBoard(){
               <div 
                 style={{ display: "flex", gap: "12px" }}
                 { ...provided.droppableProps } // Droppableとして必要なイベント・属性
-                ref={ provided.innerRef } // このDOMをライブラリが操作するために指定必須
+                ref={ provided.innerRef } // 👉 このDOMをライブラリが操作するために指定必須
               >
-                {/* リストの集合 */}
+                {/* リスト */}
                 {
                   sortedLists.map(list => (
                     <SortableList 
-                      key={list.id} 
+                      key={ list.id } 
                       list={ list } 
                       deleteList={ deleteList }
                       errorMessage={ errorMessage }
