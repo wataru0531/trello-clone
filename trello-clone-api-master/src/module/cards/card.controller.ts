@@ -1,3 +1,6 @@
+
+// ✅ card.controller
+
 import { Router, Request, Response } from 'express';
 import datasource from '../../datasource';
 import { Card } from './card.entity';
@@ -7,7 +10,7 @@ import { In } from 'typeorm';
 const cardController = Router();
 const cardRepository = datasource.getRepository(Card);
 
-// ボード内のカードを取得
+// ✅ ボード内のカードを取得
 cardController.get('/:boardId', Auth, async (req: Request, res: Response) => {
   try {
     const { boardId } = req.params;
@@ -25,7 +28,7 @@ cardController.get('/:boardId', Auth, async (req: Request, res: Response) => {
   }
 });
 
-// 特定のカードを取得
+// ✅ 特定のカードを取得
 cardController.get('/:id', Auth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -45,10 +48,10 @@ cardController.get('/:id', Auth, async (req: Request, res: Response) => {
   }
 });
 
-// カードを作成
+// ✅　カードを作成
 cardController.post('/', Auth, async (req: Request, res: Response) => {
   try {
-    const { title, listId } = req.body;
+    const { listId, title } = req.body; // リストid → リストに紐づくカード
 
     if (!title) {
       res.status(400).json({ message: 'カードタイトルは必須です' });
@@ -60,19 +63,22 @@ cardController.post('/', Auth, async (req: Request, res: Response) => {
       return;
     }
 
-    // 最大position値を取得
+    // ✅　リストの中で、カードを一番下(末尾)に追加するための並び順(position)を決めていく
+
+    // 既存のカードの中での一番大きいposition値を取得
     const maxPositionResult = await cardRepository
       .createQueryBuilder('card')
       .select('MAX(card.position)', 'maxPosition')
-      .where('card.listId = :listId', { listId })
-      .getRawOne();
+      .where('card.listId = :listId', { listId }) // 👉 指定されたlistIdに属するカードだけを対象に
+      .getRawOne(); // 
 
-    const nextPosition =
-      maxPositionResult.maxPosition != null
-        ? maxPositionResult.maxPosition + 1
-        : 0;
+    // すでにカードがあるなら → +1 のposition
+    // まだ1枚もないなら → 0 からスタート
+    const nextPosition = maxPositionResult.maxPosition != null
+                      ? maxPositionResult.maxPosition + 1
+                      : 0;
 
-    const card = await cardRepository.save({
+    const card = await cardRepository.save({ // そのpositionで保存
       userId: req.currentUser.id,
       title,
       listId,
@@ -86,7 +92,7 @@ cardController.post('/', Auth, async (req: Request, res: Response) => {
   }
 });
 
-// カードを更新（単一または複数）
+// ✅　カードを更新（単一または複数）
 cardController.put('/', Auth, async (req: Request, res: Response) => {
   try {
     const { cards } = req.body;
@@ -150,7 +156,7 @@ cardController.put('/', Auth, async (req: Request, res: Response) => {
   }
 });
 
-// カードを削除
+// ✅ カードを削除
 cardController.delete('/:id', Auth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

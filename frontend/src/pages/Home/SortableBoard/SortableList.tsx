@@ -11,10 +11,16 @@ import type { List } from '../../../modules/lists/list.entity';
 type SortableListProps = {
   list: List;
   deleteList: (id: string) => void;
+  createCard: (listId: string, title: string) => Promise<void>
   errorMessage?: string | null;
 }
 
-export function SortableList({ list, deleteList, errorMessage }: SortableListProps){
+export function SortableList({ 
+  list, 
+  deleteList, 
+  errorMessage,
+  createCard,
+}: SortableListProps){
   // console.log(list); // List {id: 'b53c7c1d-b7db-4cd1-ba68-ed030a8b8f5c', title: '初めてのリスト', position: 0, boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', createdAt: '2026-01-22T10:16:52.000Z', …}
   const { id, title, position } = list;
 
@@ -58,7 +64,7 @@ export function SortableList({ list, deleteList, errorMessage }: SortableListPro
             </div>
 
             {/* カードを追加ボタン */}
-            <AddCard />
+            <AddCard listId={ id } createCard={ createCard } />
           </div>
         </div>
       )}

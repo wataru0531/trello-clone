@@ -11,12 +11,16 @@ import { currentUserAtom } from "../../modules/auth/current-user";
 import { Sidebar } from "./Sidebar";
 import { listsAtom } from "../../modules/lists/list.state"; // Listsのアトム
 import { listRepository } from "../../modules/lists/list.repository";
+import { cardRepository } from "../../modules/cards/card.repository";
+import { cardsAtom } from "../../modules/cards/card.state";
+
 
 function Home() {
   const [ showSidebar, setShowSidebar ] = useState(false);
   const currentUser = useAtomValue(currentUserAtom);
   // console.log(currentUser); // User {id: '9f122c2a-6d50-4ec5-9801-9a988cd39d4a', name: 'wataru', email: 'obito0531@gmail.com', boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', thumbnailUrl: null, …}
   const setLists = useSetAtom(listsAtom); // 👉 リストを更新するだけのメソッド
+  const setCards = useSetAtom(cardsAtom) // 更新、上書き
 
   const onClickShowSidebar = () => setShowSidebar(true);
   const onClickCloseSidebar = () => setShowSidebar(false);
@@ -28,8 +32,21 @@ function Home() {
     setLists(lists); // 👉 グローバルステートに保持。更新用関数                             
   }
 
+  // ✅ ログイン中のユーザーに見合ったカードを取得
+  const fetchCards = async () => {
+    const cards = await cardRepository.find(currentUser!.boardId);
+    
+    setCards(cards);
+  }
+
   useEffect(() => {
-    fetchLists();
+    try {
+      fetchLists();
+      fetchCards();
+      
+    } catch(e) {
+      console.error("リストとカードの取得に失敗しました。", e);
+    }
   }, [ currentUser ]); // ログインしているユーザーが変わればboardIdも変わるのでlistsのデータを取得しなおす
 
   if(currentUser == null) return <Navigate to="/signin" replace={ true } />

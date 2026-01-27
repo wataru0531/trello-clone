@@ -13,6 +13,7 @@ import { currentUserAtom } from '../../../modules/auth/current-user';
 import { listRepository } from '../../../modules/lists/list.repository';
 import { listsAtom } from '../../../modules/lists/list.state';
 import { DragDropContext, Droppable, type DropResult }from "@hello-pangea/dnd";
+import { cardRepository } from "../../../modules/cards/card.repository";
 
 function SortableBoard(){
   const currentUser = useAtomValue(currentUserAtom);
@@ -92,6 +93,12 @@ function SortableBoard(){
     }
   }
 
+  // ✅ カードを作る処理　→ AddCardで発火させる
+  const createCard = async (listId: string, title: string) => {
+    const newCard = await cardRepository.create(listId, title);
+    // console.log(newCard); // Card {id: '6f3ba052-b0bb-4742-9c14-3ab38fd7b943', title: 'テストカード2', position: 0, description: null, dueDate: null, …}
+  }
+
   return(
     // ドラッグ＆ドロップ全体を管理する親コンテナ
     <DragDropContext onDragEnd={ handleDragEnd }>
@@ -117,6 +124,7 @@ function SortableBoard(){
                       key={ list.id } 
                       list={ list } 
                       deleteList={ deleteList }
+                      createCard={ createCard }
                       errorMessage={ errorMessage }
                     />
                   ))
@@ -128,7 +136,7 @@ function SortableBoard(){
           }
         </Droppable>
 
-        {/* リストを追加するボタン */}
+        {/* ✅ リストを追加するボタン */}
         <AddList createList={ createList } />
       </div>
     </DragDropContext>
