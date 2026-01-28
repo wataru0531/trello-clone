@@ -15,6 +15,8 @@ export const selectedCardIdAtom = atom<string | null>(null);
 // → 派生atom
 //    → 読み取り専用。更新できない。依存しているatomの状態が更新されたら自動的に更新される。
 //      自分では状態を持たない。
+// ⭐️ selectedCardIdAtom や cardsAtomにどこかのコンポーネントで変更があった場合は動的に変わる
+//    → 依存しているので
 export const selectedCardAtom = atom((get) => {
   const selectedCardId = get(selectedCardIdAtom); // 選択したカードのid
   

@@ -14,11 +14,14 @@ import { listRepository } from '../../../modules/lists/list.repository';
 import { listsAtom } from '../../../modules/lists/list.state';
 import { DragDropContext, Droppable, type DropResult }from "@hello-pangea/dnd";
 import { cardRepository } from "../../../modules/cards/card.repository";
+import { cardsAtom } from "../../../modules/cards/card.state";
 
 
 function SortableBoard(){
   const currentUser = useAtomValue(currentUserAtom);
   const [ lists, setLists ] = useAtom(listsAtom);
+  const [ cards, setCards ] = useAtom(cardsAtom);
+
   const sortedLists = [...lists].sort((a, b) => a.position - b.position ); // → 昇順に並べ替え
   // sort → a - b を繰り返し、プラスなら前に並べ変えていく
   const [ errorMessage, setErrorMessage ] = useState<string | null>("");
@@ -98,6 +101,9 @@ function SortableBoard(){
   const createCard = async (listId: string, title: string) => {
     const newCard = await cardRepository.create(listId, title);
     // console.log(newCard); // Card {id: '6f3ba052-b0bb-4742-9c14-3ab38fd7b943', title: 'テストカード2', position: 0, description: null, dueDate: null, …}
+  
+    // グローバルステートを更新 → レンダリングされるので更新する
+    setCards(prevCards => [...prevCards, newCard]);
   }
 
   return(

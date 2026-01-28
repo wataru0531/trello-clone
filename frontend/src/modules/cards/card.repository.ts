@@ -1,7 +1,5 @@
 
-
 // ✅ card.repository.ts
-
 
 import api from "../../lib/api";
 import { Card } from "./card.entity";
@@ -25,6 +23,6 @@ export const cardRepository = {
     await api.delete(`/cards/${id}`);
     return true;
   },
-  
+
 
 }

@@ -4,7 +4,6 @@
 // TODO Formタグに変更
 
 import { useState } from "react";
-import type { Card } from "../../../modules/cards/card.entity";
 
 type AddCardProps = {
   listId: string;
