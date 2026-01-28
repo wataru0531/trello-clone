@@ -12,7 +12,8 @@ import { Sidebar } from "./Sidebar";
 import { listsAtom } from "../../modules/lists/list.state"; // Listsのアトム
 import { listRepository } from "../../modules/lists/list.repository";
 import { cardRepository } from "../../modules/cards/card.repository";
-import { cardsAtom } from "../../modules/cards/card.state";
+import { cardsAtom, selectedCardAtom } from "../../modules/cards/card.state";
+import { CardModal } from "./CardModal";
 
 
 function Home() {
@@ -21,6 +22,8 @@ function Home() {
   // console.log(currentUser); // User {id: '9f122c2a-6d50-4ec5-9801-9a988cd39d4a', name: 'wataru', email: 'obito0531@gmail.com', boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', thumbnailUrl: null, …}
   const setLists = useSetAtom(listsAtom); // 👉 リストを更新するだけのメソッド
   const setCards = useSetAtom(cardsAtom) // 更新、上書き
+
+  const selectedCard = useAtomValue(selectedCardAtom); // 選択したカード
 
   const onClickShowSidebar = () => setShowSidebar(true);
   const onClickCloseSidebar = () => setShowSidebar(false);
@@ -84,7 +87,8 @@ function Home() {
       {/* サイドバー(メニュー) */}
       { showSidebar && <Sidebar onClickCloseSidebar={ onClickCloseSidebar } /> }
 
-      {/* <CardModal /> */}
+      {/* カードを選択したら出現 */}
+      { selectedCard && <CardModal /> }
     </div>
   );
 }

@@ -16,9 +16,15 @@ export const cardRepository = {
   // ✅ 特定のカードを取得
   async find(boardId: string) {
     const result = await api.get(`/cards/${boardId}`);
+    // console.log(result)
 
     return result.data.map((card: Card) => new Card(card))
-  }
-
+  },
+  // ✅ 選択したカードを削除
+  async delete(id: string): Promise<boolean> { // カードのidを指定
+    await api.delete(`/cards/${id}`);
+    return true;
+  },
+  
 
 }

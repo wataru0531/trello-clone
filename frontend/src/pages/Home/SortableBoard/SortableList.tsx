@@ -2,11 +2,13 @@
 // ✅ SortableList
 // → リスト1つ
 
-import { Draggable } from "@hello-pangea/dnd"
+import { Draggable } from "@hello-pangea/dnd";
+import { useAtomValue } from "jotai";
 
 import { SortableCard } from './SortableCard';
 import { AddCard } from './AddCard';
 import type { List } from '../../../modules/lists/list.entity';
+import { cardsAtom } from "../../../modules/cards/card.state";
 
 type SortableListProps = {
   list: List;
@@ -15,6 +17,7 @@ type SortableListProps = {
   errorMessage?: string | null;
 }
 
+// リスト1つ
 export function SortableList({ 
   list, 
   deleteList, 
@@ -23,6 +26,12 @@ export function SortableList({
 }: SortableListProps){
   // console.log(list); // List {id: 'b53c7c1d-b7db-4cd1-ba68-ed030a8b8f5c', title: '初めてのリスト', position: 0, boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', createdAt: '2026-01-22T10:16:52.000Z', …}
   const { id, title, position } = list;
+
+  const cards = useAtomValue(cardsAtom); // 全てのカードを取得
+  const sortedListCards = cards
+                          .filter(card => card.listId == id) // → 全てのカードを、リスト1つのidに見合ったカードのみを紐づけて抽出
+                          .sort((a, b) => a.position - b.position);
+  // console.log(sortedListCards)
 
   return(
     // ✅ ドラッグする要素に指定
@@ -58,9 +67,16 @@ export function SortableList({
               { errorMessage && <p className="error-message">{ errorMessage }</p> }
             </div>
             
-            {/*  */}
+            {/* リスト1つに紐づいているカード群 */}
             <div style={{ minHeight: "1px" }}>
-              <SortableCard />
+              {
+                sortedListCards.map((card) => {
+                  // console.log(card); // Card {id: '6f3ba052-b0bb-4742-9c14-3ab38fd7b943', title: 'テストカード2', position: 0, description: null, dueDate: null, …}
+                  return <SortableCard key={ card.id } card={ card }  />
+                  // 👉 keyはReact内部で使う特別な属性なのでPropsとして渡らない
+                })
+              }
+              {/* <SortableCard /> */}
             </div>
 
             {/* カードを追加ボタン */}

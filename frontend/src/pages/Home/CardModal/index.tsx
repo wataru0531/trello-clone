@@ -1,6 +1,30 @@
 
+// ✅ CardModal
+// → カードをクリックした時に表示
+
+import { useAtom } from "jotai";
+import { selectedCardIdAtom } from "../../../modules/cards/card.state";
+import { cardRepository } from "../../../modules/cards/card.repository";
+
 
 export const CardModal = () => {
+  const [ selectedCardId, setSelectedCardId ] = useAtom(selectedCardIdAtom);
+
+  // ✅ カードを削除
+  const deleteCard = async () => {
+    const confirmMessage = "カードを削除しますか？この操作は取り消せません。";
+    try {
+      if(window.confirm(confirmMessage)) {
+        await cardRepository.delete(selectedCardId!);
+      }
+
+    } catch(e) {
+      console.error(e);
+
+    }
+
+  }
+
   return (
     <div className="card-modal-overlay">
       <div 

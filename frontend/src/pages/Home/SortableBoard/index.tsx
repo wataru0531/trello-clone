@@ -15,6 +15,7 @@ import { listsAtom } from '../../../modules/lists/list.state';
 import { DragDropContext, Droppable, type DropResult }from "@hello-pangea/dnd";
 import { cardRepository } from "../../../modules/cards/card.repository";
 
+
 function SortableBoard(){
   const currentUser = useAtomValue(currentUserAtom);
   const [ lists, setLists ] = useAtom(listsAtom);
