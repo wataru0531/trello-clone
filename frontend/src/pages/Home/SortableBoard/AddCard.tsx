@@ -24,7 +24,7 @@ export function AddCard({ listId, createCard }: AddCardProps) {
     )
   }
 
-  const onSubmitCreateCard = async (e) => {
+  const onSubmitCreateCard = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if(title === "") return;
 
@@ -38,7 +38,6 @@ export function AddCard({ listId, createCard }: AddCardProps) {
       setShowInput(false);
       setErrorMessage(null);
     }
-
   }
 
   return (

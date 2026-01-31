@@ -97,7 +97,7 @@ function SortableBoard(){
     }
   }
 
-  // ✅ カードを作る処理　→ AddCardで発火させる
+  // ✅ カードを作る処理　→ AddCardで発火させる。リスト1つづつに持たせる
   const createCard = async (listId: string, title: string) => {
     const newCard = await cardRepository.create(listId, title);
     // console.log(newCard); // Card {id: '6f3ba052-b0bb-4742-9c14-3ab38fd7b943', title: 'テストカード2', position: 0, description: null, dueDate: null, …}

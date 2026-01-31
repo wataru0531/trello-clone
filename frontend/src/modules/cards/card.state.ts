@@ -11,6 +11,7 @@ export const cardsAtom = atom<Card[]>([]);
 // ⭐️ 選択したカードのidをグローバルで持つ、何も選択しなければnull
 export const selectedCardIdAtom = atom<string | null>(null);
 
+
 // ✅ 選択したカード
 // → 派生atom
 //    → 読み取り専用。更新できない。依存しているatomの状態が更新されたら自動的に更新される。

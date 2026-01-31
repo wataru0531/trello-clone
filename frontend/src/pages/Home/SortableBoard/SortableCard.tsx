@@ -26,11 +26,13 @@ type SortableCardProps = {
 
 // 1つのカード
 export function SortableCard({ card }: SortableCardProps) {
+  // console.log(card); // Card {id: 'f80c18ff-9f4e-4428-9bed-ff38c29e66f3', title: 'テストカード2-3', position: 1, description: null, dueDate: null,createdAt: "2026-01-28T14:03:39.000Z" …}
   const { id, title } = card;
-  const datetime = "2025-06-08";
+
+  const date = new Date(card.createdAt);
+  // console.log(date); // Tue Jan 27 2026 17:08:12 GMT+0900 (日本標準時)
 
   const setSelectedCardId = useSetAtom(selectedCardIdAtom); // 選択したカードのid
-
 
   return (
     <div>
@@ -47,7 +49,11 @@ export function SortableCard({ card }: SortableCardProps) {
           { title }
         </div>
         {/* <div className="card-badge">🕒 { dueDate }</div> */}
-        <time dateTime={ datetime } className="card-badge">🕒 { datetime }</time>
+        <time dateTime={ date.toISOString() } className="card-badge">
+          🕒 { date.toLocaleDateString("ja-JP") }
+        </time>
+        {/* ✅　datetimeタグ　→ ISO形式 (国際標準企画)
+        ✅ 人間への表示はLocale → 形式  */}
       </div>
     </div>
   );

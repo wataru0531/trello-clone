@@ -23,7 +23,8 @@ function Home() {
   const setLists = useSetAtom(listsAtom); // 👉 リストを更新するだけのメソッド
   const setCards = useSetAtom(cardsAtom) // 更新、上書き
 
-  const selectedCard = useAtomValue(selectedCardAtom); // 選択したカード
+  const selectedCard = useAtomValue(selectedCardAtom); // 選択したカード、初期値はnull
+  // console.log(selectedCard);
 
   const onClickShowSidebar = () => setShowSidebar(true);
   const onClickCloseSidebar = () => setShowSidebar(false);

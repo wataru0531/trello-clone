@@ -105,7 +105,7 @@ cardController.put('/', Auth, async (req: Request, res: Response) => {
       return;
     }
 
-    // 更新対象のカードIDを取得
+    // 更新対象のカードIDだけの配列を取得
     const cardIds = cardsToUpdate.map((card) => card.id).filter((id) => id);
 
     if (cardIds.length === 0) {
