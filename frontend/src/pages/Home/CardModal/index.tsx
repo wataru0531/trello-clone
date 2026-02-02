@@ -13,14 +13,15 @@ export const CardModal = () => {
   const [ selectedCardId, setSelectedCardId ] = useAtom(selectedCardIdAtom);
   // SortableCardのカードを選択 → card.state.tsで更新 → idがここで取れる
   // console.log(selectedCardId);
-  const setCards = useSetAtom(cardsAtom); // 更新用の関数
-  const selectedCard = useAtomValue(selectedCardAtom); // 選択しているカード
+  const setCards = useSetAtom(cardsAtom); // グローバルステートの更新用の関数
+  const selectedCard = useAtomValue(selectedCardAtom); // 選択しているカードの状態
+  
   const [ title, setTitle ] = useState(selectedCard?.title || "");
   const [ description, setDescription ] = useState(selectedCard?.description || "");
   const [ dueDate, setDueDate ] = useState(selectedCard?.dueDate || "");
   const [ completed, setCompleted ] = useState(selectedCard?.completed || false);
 
-  // ✅ カードを更新
+  // ✅ カードを更新する処理
   const updateCard = async () => {
     try {
       const card = {
@@ -34,6 +35,7 @@ export const CardModal = () => {
       const updatedCard = await cardRepository.update([ card ]);
       // → 更新された後のcard情報
 
+      // グローバルのステートを更新
       setCards(prevCards => {
         return prevCards.map(card => {
           return card.id == updatedCard[0].id ? updatedCard[0] : card 
@@ -46,7 +48,6 @@ export const CardModal = () => {
     } catch(e) {
       console.error("カードの更新に失敗しました。", e)
     }
-    
   }
 
   // ✅ カードを削除
@@ -63,20 +64,19 @@ export const CardModal = () => {
 
         setSelectedCardId(null); // モーダルを閉じるためにnullに
       }
-      
     } catch(e) {
       console.error("カードの削除に失敗しました。", e);
     }
   }
 
   return (
-    <div 
+    <div
       className="card-modal-overlay"
       onClick={ () => setSelectedCardId(null) }
     >
       <div 
         className="card-modal" 
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()} // stopPropagation → バブリングを防ぐ(親へのイベントの伝播)
       >
         <div className="card-modal-header">
           <div className="card-modal-list-info">

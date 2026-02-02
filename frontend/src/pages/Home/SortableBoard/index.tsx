@@ -12,7 +12,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { currentUserAtom } from '../../../modules/auth/current-user';
 import { listRepository } from '../../../modules/lists/list.repository';
 import { listsAtom } from '../../../modules/lists/list.state';
-import { DragDropContext, Droppable, type DropResult }from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, type DraggableLocation, type DropResult }from "@hello-pangea/dnd";
 import { cardRepository } from "../../../modules/cards/card.repository";
 import { cardsAtom } from "../../../modules/cards/card.state";
 
@@ -55,13 +55,29 @@ function SortableBoard(){
     }
   }
 
+  // ✅ ドラッグし終わった時の処理。
+  // → リスト、カードとで処理を分けていく
+  const handleDragEnd = async (result: DropResult) => {
+    const { source, destination, type } = result;
+
+    if(destination == null) return;
+
+    // 👉 リストの処理
+    if(type == "list") { // 👉 type ... Droppable に指定したtype
+      await handleListMove(source, destination);
+      return;
+    }
+
+    // 👉 カードの処理(同じリスト内でカードを移動した時の処理)
+    // if(type == "card") {}
+  }
+
   // ✅ ドラッグで並び替えられた順番を、配列として作り直して、stateに保存
   // 👉 移動後に発火
-  const handleDragEnd = async (result: DropResult) => {
-    const { source, destination } = result; // source:移動元の情報、destination:移動先の情報
-                                            
-    if(destination === null) return; // ドラッグしたが、ドラッグ可能エリア外で離したなど
-
+  const handleListMove = async ( 
+    source: DraggableLocation,  // source:移動元の情報、destination:移動先の情報
+    destination: DraggableLocation,
+  ) => {                    
     // 動かしたリストを一旦、配列から1つだけ抜き取る
     const [ reorderedList ] = sortedLists.splice(source.index, 1);
     // console.log(reorderedList); // List {id: 'cd3178fb-1e2f-4f42-b428-7c2dbed63d6b', title: 'テストカード3', position: 3, boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', createdAt: '2026-01-23T13:38:19.000Z', …}
@@ -108,6 +124,7 @@ function SortableBoard(){
 
   return(
     // ドラッグ＆ドロップ全体を管理する親コンテナ
+    // → ここではリスト、カードを動かしていく
     <DragDropContext onDragEnd={ handleDragEnd }>
       <div className="board-container">
         {/* 置き場所。「ここにドロップしていいよ」というエリア */}

@@ -92,7 +92,8 @@ cardController.post('/', Auth, async (req: Request, res: Response) => {
   }
 });
 
-// ✅　カードを更新（単一または複数）
+// ✅ カードを更新（単一または複数）
+//   → モーダルで使用
 cardController.put('/', Auth, async (req: Request, res: Response) => {
   try {
     const { cards } = req.body;
@@ -123,6 +124,7 @@ cardController.put('/', Auth, async (req: Request, res: Response) => {
       const updateData = cardsToUpdate.find(
         (card) => card.id === existingCard.id
       );
+
       return {
         ...existingCard,
         ...updateData,
@@ -149,7 +151,7 @@ cardController.put('/', Auth, async (req: Request, res: Response) => {
       id: In(cardIds),
     });
 
-    res.status(200).json(updatedCards);
+    res.status(200).json(updatedCards); // 更新後のcard情報を返す
   } catch (error) {
     console.error('カード更新エラー:', error);
     res.status(500).json({ message: 'サーバーエラーが発生しました' });

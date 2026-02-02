@@ -2,7 +2,7 @@
 // ✅ SortableList
 // → リスト1つ
 
-import { Draggable } from "@hello-pangea/dnd";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { useAtomValue } from "jotai";
 
 import { SortableCard } from './SortableCard';
@@ -43,7 +43,7 @@ export function SortableList({
         <div 
           ref={ provided.innerRef } // DnD側がこのDOMを直接操作するために指定
           { ...provided.draggableProps } // DnD側から渡ってくるプロップス
-          style={{ 
+          style={{ // CSSの設定
             ...provided.draggableProps.style,
             opacity: snapshot.isDragging ? 0.8 : 1, // ドラッグ中は透明度を上げる
           }} // DnDから渡されるスタイル
@@ -67,17 +67,30 @@ export function SortableList({
               { errorMessage && <p className="error-message">{ errorMessage }</p> }
             </div>
             
-            {/* リスト1つに紐づいているカード群 */}
-            <div style={{ minHeight: "1px" }}>
-              {
-                sortedListCards.map((card) => {
-                  // console.log(card); // Card {id: '6f3ba052-b0bb-4742-9c14-3ab38fd7b943', title: 'テストカード2', position: 0, description: null, dueDate: null, …}
-                  return <SortableCard key={ card.id } card={ card }  />
-                  // 👉 keyはReact内部で使う特別な属性なのでPropsとして渡らない
-                })
-              }
-              {/* <SortableCard /> */}
-            </div>
+            {/* 
+              ⭐️ リスト内でドラッグできるようにする
+              type → cardと分けるための識別子とする
+            */}
+            <Droppable droppableId={ id } type="card">
+              {(provided) => (
+                  <div // リスト1つに紐づいているカード群
+                    style={{ minHeight: "1px" }}
+                    ref={ provided.innerRef }
+                    {...provided.droppableProps}
+                  >
+                    {
+                      sortedListCards.map((card) => {
+                        // console.log(card); // Card {id: '6f3ba052-b0bb-4742-9c14-3ab38fd7b943', title: 'テストカード2', position: 0, description: null, dueDate: null, …}
+                        return <SortableCard key={ card.id } card={ card }  />
+                        // 👉 keyはReact内部で使う特別な属性なのでPropsとして渡らない
+                      })
+                    }
+                    { 
+                      provided.placeholder // 動いた時にその動いた時の穴を埋めて崩れないようにしてくれる
+                    }
+                  </div>
+                )}
+            </Droppable>
 
             {/* カードを追加ボタン */}
             <AddCard listId={ id } createCard={ createCard } />

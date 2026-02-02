@@ -26,6 +26,14 @@ export class Card {
 
   constructor(data: Card) {
     Object.assign(this, data);  
+
+    // console.log(data.dueDate); // 2026-02-04T00:00:00.000Z
+    // ✅ dueDateを変換して保持する
+    if(data.dueDate != null) {
+      this.dueDate = new Date(data.dueDate).toLocaleDateString("sv-SE");
+      // → 2026-02-02 の形になる
+      // console.log(this.dueDate); // 2026-02-04
+    }
   }
 }
 
