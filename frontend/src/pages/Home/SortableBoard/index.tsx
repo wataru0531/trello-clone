@@ -15,6 +15,7 @@ import { listsAtom } from '../../../modules/lists/list.state';
 import { DragDropContext, Droppable, type DraggableLocation, type DropResult }from "@hello-pangea/dnd";
 import { cardRepository } from "../../../modules/cards/card.repository";
 import { cardsAtom } from "../../../modules/cards/card.state";
+import type { Card } from "../../../modules/cards/card.entity";
 
 
 function SortableBoard(){
@@ -55,21 +56,96 @@ function SortableBoard(){
     }
   }
 
-  // ✅ ドラッグし終わった時の処理。
+  // ✅ ドラッグし終わった時の処理
   // → リスト、カードとで処理を分けていく
   const handleDragEnd = async (result: DropResult) => {
-    const { source, destination, type } = result;
+    // console.log(result); // {draggableId: 'f80c18ff-9f4e-4428-9bed-ff38c29e66f3', type: 'card', source: {…}, reason: 'DROP', mode: 'FLUID', …}
+    const { source, destination, type, draggableId } = result;
+    // console.log(source, destination, type); // 元の情報、ドロップ先の情報
 
-    if(destination == null) return;
+    if(destination == null) return; // ドロップ先がない場合(ドロップ可能エリア外など)は処理を中観
 
-    // 👉 リストの処理
+    // 👉 リストを移動した時の処理
     if(type == "list") { // 👉 type ... Droppable に指定したtype
       await handleListMove(source, destination);
       return;
     }
 
-    // 👉 カードの処理(同じリスト内でカードを移動した時の処理)
-    // if(type == "card") {}
+    // 👉 カードを動かした場合の処理 → 同じカード内か、違うカードを跨ぐのかで分岐
+    if(type == "card") {
+      // draggableId → 移動対象のカードのid。カード1つをラップしているid
+      await handleCardMove(draggableId, source, destination);
+    }
+  }
+
+  // ✅ カードを動かした場合の処理 → 同じカード内か、違うカードを跨ぐのかで分岐させる処理
+  const handleCardMove = async (
+    cardId: string, //  移動対象のカードのid。
+    source: DraggableLocation,
+    destination: DraggableLocation
+  ) => {
+    const targetCard = cards.find(card => card.id == cardId); // 対象のカードを取得
+    if(targetCard == null) return cards;
+
+    const updatedCards = source.droppableId == destination.droppableId // 👉 同じカード内を動いた時
+              ? moveCardInSameList(source, destination) // 同じカード内の処理
+              : moveCardBetweenLists(source, destination, targetCard); // カードを跨いだ時の動き
+
+    setCards(updatedCards); // グローバルステートを更新
+  }
+
+  // ✅ カードをリスト間を跨いで動かした時の処理
+  const moveCardBetweenLists = (
+    source: DraggableLocation,
+    destination: DraggableLocation,
+    card: Card
+  ) => {
+    // 移動元からの配列から削除
+    const sourceListCards = cards.filter((c) => {
+      // 全てのカードの中から移動元のカードのidと合致するものを取得
+      // → ⭐️ TODO ... 移動対象のカードも入ってきてしまうのでそれは入れない
+      return c.listId == source.droppableId && c.id !== card.id
+    }).sort((a, b) => a.position - b.position); // 昇順に並び替え
+
+    const updatedCards = updateCardsPosition(cards, soureListCards);
+  }
+
+  // ✅ カードを動かした時の処理
+  const moveCardInSameList = async (
+    source: DraggableLocation, // 元の位置などの情報
+    destination: DraggableLocation // ドロップ先の情報
+  ) => {
+    // 同じリスト内のカードを取得
+    // console.log(cards.filter(card => card.listId == source.droppableId)) // (2) [Card, Card]
+    const listCards = cards
+                      .filter(card => card.listId == source.droppableId) // droppableId → エリアの識別子
+                      .sort((a, b) => a.position - b.position); // 昇順に並べ替え
+
+    const [ removed ] = listCards.splice(source.index, 1); // 選択したカードを元のリストから削除
+    listCards.splice(destination.index, 0, removed); // それをドロップ先のインデックスに差し込む
+
+    return updatedCards = updateCardsPosition(cards, listCards); // 👉 positionを更新
+  }
+
+
+  // ✅ 更新後のカードの配列の position を更新して、全てのカードの配列を返す
+  // cards → グローバルステートのカード全体の配列
+  // updatedCards → 更新対象のカードを含めたそのリスト内のカード全ての配列
+  //                👉 既に新しい順には並び替えられている
+  //                しかし、positionのみが更新されていない状態
+  const updateCardsPosition = (cards: Card[], updatedCards: Card[]) => {
+    return cards.map(card => {
+      // ✅ 全体のカードの中に、更新対象のカードが含まれているかどうかを検証し、
+      //    そして、そのインデックスを返す
+      const cardIndex = updatedCards.findIndex(c => c.id == card.id);
+
+      return cardIndex !== -1 // 👉 存在する場合は1、存在しない場合は-1を返す
+      ? {
+          ...updatedCards[cardIndex], // ⭐️ 更新対象のカード情報を展開しつつ、positionも更新する
+          position: cardIndex,
+        }
+      : card; // インデックスが-1の時 → updatedCardsに含まれていないカードなので更新の必要なし
+    })
   }
 
   // ✅ ドラッグで並び替えられた順番を、配列として作り直して、stateに保存
@@ -103,8 +179,7 @@ function SortableBoard(){
     const originalLists = [ ...lists ]; // 更新に失敗した時に使う
     setLists(updatedLists); // 👉 グローバルステートを更新(上書き)
 
-    // ✅ DBの中も更新していく
-    try {
+    try { // ✅ DBの中も更新していく。→ フロントとDBは違う。フロントだけ更新してもDBを更新してないのでリロードすると元に戻る
       await listRepository.update(updatedLists);
 
     } catch(e) {
