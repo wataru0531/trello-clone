@@ -56,12 +56,12 @@ function SortableBoard(){
     }
   }
 
-  // ✅ ドラッグし終わった時の処理
+  // ✅ ドラッグ終了時の処理
   // → リスト、カードとで処理を分けていく
   const handleDragEnd = async (result: DropResult) => {
     // console.log(result); // {draggableId: 'f80c18ff-9f4e-4428-9bed-ff38c29e66f3', type: 'card', source: {…}, reason: 'DROP', mode: 'FLUID', …}
     const { source, destination, type, draggableId } = result;
-    // console.log(source, destination, type); // 元の情報、ドロップ先の情報
+    // console.log(source, destination, type); // 元の情報、ドロップ先の情報、対象カードのid
 
     if(destination == null) return; // ドロップ先がない場合(ドロップ可能エリア外など)は処理を中観
 
@@ -74,6 +74,7 @@ function SortableBoard(){
     // 👉 カードを動かした場合の処理 → 同じカード内か、違うカードを跨ぐのかで分岐
     if(type == "card") {
       // draggableId → 移動対象のカードのid。カード1つをラップしているid
+      // console.log(draggableId);
       await handleCardMove(draggableId, source, destination);
     }
   }
@@ -84,14 +85,27 @@ function SortableBoard(){
     source: DraggableLocation,
     destination: DraggableLocation
   ) => {
-    const targetCard = cards.find(card => card.id == cardId); // 対象のカードを取得
+    const targetCard = cards.find(card => card.id == cardId); // 移動対象のカードを取得
     if(targetCard == null) return cards;
 
-    const updatedCards = source.droppableId == destination.droppableId // 👉 同じカード内を動いた時
-              ? moveCardInSameList(source, destination) // 同じカード内の処理
-              : moveCardBetweenLists(source, destination, targetCard); // カードを跨いだ時の動き
+    const originalCards = [ ...cards ]; 
 
-    setCards(updatedCards); // グローバルステートを更新
+    try {
+      // droppableId: 動かすカード群の全体のid。draggableId: 動かすカードのid
+      const updatedCards = source.droppableId == destination.droppableId // 👉 同じカード内を動いた時
+                ? moveCardInSameList(source, destination) // 同じカード内の処理
+                : moveCardBetweenLists(source, destination, targetCard); // リストを跨いだ時の動き
+
+      setCards(updatedCards); // 👉 グローバルステートを更新
+
+      // ⭐️ DBを更新していく
+      await cardRepository.update(updatedCards);
+
+    } catch(e) {
+      console.error("カードの移動に失敗しました。", e);
+      setCards(originalCards); // 失敗した場合は元のカード配列を入れる
+    }
+    
   }
 
   // ✅ カードをリスト間を跨いで動かした時の処理
@@ -100,33 +114,41 @@ function SortableBoard(){
     destination: DraggableLocation,
     card: Card
   ) => {
-    // 移動元からの配列から削除
+    // 移動元のカード群のリストから移動対象のカードを削除 = 移動対象以外のカードが入っていないリストを取得
     const sourceListCards = cards.filter((c) => {
-      // 全てのカードの中から移動元のカードのidと合致するものを取得
-      // → ⭐️ TODO ... 移動対象のカードも入ってきてしまうのでそれは入れない
+      // 全てのカードの中から、移動対象のカードがあるリスト
+      // → ⭐️ 移動対象のカードも取得してまうのでそれは入れない
       return c.listId == source.droppableId && c.id !== card.id
-    }).sort((a, b) => a.position - b.position); // 昇順に並び替え
+    }).sort((a, b) => a.position - b.position); // 昇順
 
-    const updatedCards = updateCardsPosition(cards, soureListCards);
+    const updatedCards = updateCardsPosition(cards, sourceListCards); // インデックスを修正
+
+    // 移動先に含まれているカード一覧を取得
+    const destinationListCards = updatedCards.filter(c => c.listId == destination.droppableId)
+                                  .sort((a, b) => a.position - b.position);
+
+    // 移動先のリストに移動対象のカードを入れていく
+    destinationListCards.splice(destination.index, 0, { ...card, listId: destination.droppableId });
+
+    return updateCardsPosition(updatedCards, destinationListCards);
   }
 
-  // ✅ カードを動かした時の処理
-  const moveCardInSameList = async (
+  // ✅ カードをリスト内で動かした時の処理
+  const moveCardInSameList = (
     source: DraggableLocation, // 元の位置などの情報
     destination: DraggableLocation // ドロップ先の情報
   ) => {
-    // 同じリスト内のカードを取得
-    // console.log(cards.filter(card => card.listId == source.droppableId)) // (2) [Card, Card]
-    const listCards = cards
+    // console.log(cards)
+    const listCards = cards  // 同じリスト内のカードを取得
                       .filter(card => card.listId == source.droppableId) // droppableId → エリアの識別子
                       .sort((a, b) => a.position - b.position); // 昇順に並べ替え
 
     const [ removed ] = listCards.splice(source.index, 1); // 選択したカードを元のリストから削除
     listCards.splice(destination.index, 0, removed); // それをドロップ先のインデックスに差し込む
 
-    return updatedCards = updateCardsPosition(cards, listCards); // 👉 positionを更新
+    const updatedCards = updateCardsPosition(cards, listCards); // 👉 positionを更新
+    return updatedCards; 
   }
-
 
   // ✅ 更新後のカードの配列の position を更新して、全てのカードの配列を返す
   // cards → グローバルステートのカード全体の配列

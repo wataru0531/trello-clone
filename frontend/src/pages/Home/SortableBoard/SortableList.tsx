@@ -71,7 +71,7 @@ export function SortableList({
               ⭐️ リスト内でドラッグできるようにする
               type → cardと分けるための識別子とする
             */}
-            <Droppable droppableId={ id } type="card">
+            <Droppable type="card" droppableId={ id } >
               {(provided) => (
                   <div // リスト1つに紐づいているカード群
                     style={{ minHeight: "1px" }}
