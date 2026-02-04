@@ -62,8 +62,9 @@ function SortableBoard(){
     // console.log(result); // {draggableId: 'f80c18ff-9f4e-4428-9bed-ff38c29e66f3', type: 'card', source: {…}, reason: 'DROP', mode: 'FLUID', …}
     const { source, destination, type, draggableId } = result;
     // console.log(source, destination, type); // 元の情報、ドロップ先の情報、対象カードのid
+    // console.log(draggableId); // → 動かしたリスト、カード1つ１つのidが渡ってくる
 
-    if(destination == null) return; // ドロップ先がない場合(ドロップ可能エリア外など)は処理を中観
+    if(destination == null) return; // ドロップ先がない場合(ドロップ可能エリア外などに着地した場合など)は処理を中観
 
     // 👉 リストを移動した時の処理
     if(type == "list") { // 👉 type ... Droppable に指定したtype
@@ -114,10 +115,13 @@ function SortableBoard(){
     destination: DraggableLocation,
     card: Card
   ) => {
-    // 移動元のカード群のリストから移動対象のカードを削除 = 移動対象以外のカードが入っていないリストを取得
+    // 移動元のカード群のリストから移動対象のカードを削除 
+    // 👉 移動対象のカードが入っていないリストを取得
     const sourceListCards = cards.filter((c) => {
       // 全てのカードの中から、移動対象のカードがあるリスト
       // → ⭐️ 移動対象のカードも取得してまうのでそれは入れない
+      // c.listId ... そのカードが所属しているリスト
+      // console.log(c.listId);
       return c.listId == source.droppableId && c.id !== card.id
     }).sort((a, b) => a.position - b.position); // 昇順
 
@@ -139,7 +143,7 @@ function SortableBoard(){
     destination: DraggableLocation // ドロップ先の情報
   ) => {
     // console.log(cards)
-    const listCards = cards  // 同じリスト内のカードを取得
+    const listCards = cards  // 同じリスト内のカードを全て取得
                       .filter(card => card.listId == source.droppableId) // droppableId → エリアの識別子
                       .sort((a, b) => a.position - b.position); // 昇順に並べ替え
 
@@ -154,12 +158,12 @@ function SortableBoard(){
   // cards → グローバルステートのカード全体の配列
   // updatedCards → 更新対象のカードを含めたそのリスト内のカード全ての配列
   //                👉 既に新しい順には並び替えられている
-  //                しかし、positionのみが更新されていない状態
+  //                ⭐️ しかし、positionのみが更新されていない状態
   const updateCardsPosition = (cards: Card[], updatedCards: Card[]) => {
     return cards.map(card => {
-      // ✅ 全体のカードの中に、更新対象のカードが含まれているかどうかを検証し、
-      //    そして、そのインデックスを返す
+      // ✅ 更新後の配列で、更新後のカードの並び順を調べる
       const cardIndex = updatedCards.findIndex(c => c.id == card.id);
+      // console.log(cardIndex);
 
       return cardIndex !== -1 // 👉 存在する場合は1、存在しない場合は-1を返す
       ? {
@@ -176,8 +180,8 @@ function SortableBoard(){
     source: DraggableLocation,  // source:移動元の情報、destination:移動先の情報
     destination: DraggableLocation,
   ) => {                    
-    // 動かしたリストを一旦、配列から1つだけ抜き取る
-    const [ reorderedList ] = sortedLists.splice(source.index, 1);
+    // 動かしたリストを、配列から抜き取る
+    const [ reorderedList ] = sortedLists.splice(source.index, 1); // 全てのlists
     // console.log(reorderedList); // List {id: 'cd3178fb-1e2f-4f42-b428-7c2dbed63d6b', title: 'テストカード3', position: 3, boardId: '92b5ef2c-31d0-403c-8645-7e43a15e69d8', createdAt: '2026-01-23T13:38:19.000Z', …}
 
     // ✅ 移動先に差し込む 👉 移動先の index の位置に、ドラッグしたリストを挿入
@@ -194,7 +198,7 @@ function SortableBoard(){
     const updatedLists = sortedLists.map((list, idx) => { 
       return {
         ...list,
-        position: idx, // ここで更新、上書き
+        position: idx, // 更新、上書きしたい部分
       }
     });
 
@@ -222,6 +226,8 @@ function SortableBoard(){
   return(
     // ドラッグ＆ドロップ全体を管理する親コンテナ
     // → ここではリスト、カードを動かしていく
+    // → Droppable内で移動する範囲を決めれるが、複数のDroppableを設定可能
+    //   → id, typeで分けることが可能
     <DragDropContext onDragEnd={ handleDragEnd }>
       <div className="board-container">
         {/* 置き場所。「ここにドロップしていいよ」というエリア */}

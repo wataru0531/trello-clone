@@ -36,7 +36,10 @@ export function SortableCard({ card }: SortableCardProps) {
   const setSelectedCardId = useSetAtom(selectedCardIdAtom); // 選択したカードのid
 
   return (
-    <Draggable draggableId={ id } index={ position }>
+    <Draggable 
+      draggableId={ id } 
+      index={ position }
+    >
       {(provided, snapshot) => (
         <div 
           ref={ provided.innerRef }

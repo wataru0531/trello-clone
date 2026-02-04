@@ -36,7 +36,7 @@ export function SortableList({
   return(
     // ✅ ドラッグする要素に指定
     <Draggable
-      draggableId={ id } // 一意のid
+      draggableId={ id } // 一意のid。リスト1つ１つに存在
       index={ position } // 並び順
     >
       {(provided, snapshot) => ( // snapshot → ドラッグに関する情報
@@ -71,7 +71,10 @@ export function SortableList({
               ⭐️ リスト内でドラッグできるようにする
               type → cardと分けるための識別子とする
             */}
-            <Droppable type="card" droppableId={ id } >
+            <Droppable 
+              type="card" 
+              droppableId={ id } 
+            >
               {(provided) => (
                   <div // リスト1つに紐づいているカード群
                     style={{ minHeight: "1px" }}
