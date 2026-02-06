@@ -26,3 +26,13 @@ export const currentUserAtom = atom<User>();
 // atom の値を「変更するためだけの関数」を取得する
 // const setCurrentUser = useSetAtom(currentUserAtom);
 
+// export class User {
+//   id!: string; 
+//   name!: string;
+//   email!: string;
+//   boardId!: string; 
+
+//   constructor(data: User) {
+//     Object.assign(this, data);
+//   }
+// }
